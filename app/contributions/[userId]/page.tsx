@@ -1,16 +1,15 @@
 "use client";
 
-import React, { useEffect, useState, use } from "react";
+import React, { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import dayjs from "dayjs";
 
-// ---- Supabase Client ----
+// Initialize Supabase client
 const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
 );
 
-// ---- CrimeDB Type ----
 interface CrimeDB {
   description: string;
   created_at: string;
@@ -20,20 +19,20 @@ interface CrimeDB {
   category: string;
 }
 
-// ---- Gradient Color from Rating ----
 const getRatingColor = (rating: number) => {
   const clamp = Math.max(1, Math.min(rating, 10));
-  const hue = 50 - ((clamp - 1) / 9) * 50; // 50 (yellow) → 0 (red)
+  const hue = 50 - ((clamp - 1) / 9) * 50; // from yellow (50) to red (0)
   return `hsl(${hue}, 100%, 50%)`;
 };
 
-export default function ContributionsPage({
-  params,
-}: {
-  params: Promise<{ userId: string }>;
-}) {
-  const { userId } = use(params);
+interface ContributionsPageProps {
+  params: {
+    userId: string;
+  };
+}
 
+export default function ContributionsPage({ params }: ContributionsPageProps) {
+  const { userId } = params;
   const [contributions, setContributions] = useState<CrimeDB[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -49,7 +48,7 @@ export default function ContributionsPage({
 
         if (error) throw error;
 
-        setContributions((data as CrimeDB[]) || []);
+        setContributions(data || []);
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : String(err);
         console.error(errorMessage);
@@ -103,8 +102,7 @@ export default function ContributionsPage({
                   <strong>Rating:</strong> {item.rating}
                 </p>
                 <p>
-                  <strong>Location:</strong> {item.latt.toFixed(5)},{" "}
-                  {item.long.toFixed(5)}
+                  <strong>Location:</strong> {item.latt.toFixed(5)}, {item.long.toFixed(5)}
                 </p>
               </div>
             </div>
