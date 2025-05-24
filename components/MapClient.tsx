@@ -1,7 +1,16 @@
 "use client";
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from "react-leaflet";
+
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  useMap,
+  useMapEvents,
+} from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { useEffect } from "react";
 
 // Custom blue icon
 const BlueIcon = L.icon({
@@ -16,7 +25,25 @@ const BlueIcon = L.icon({
 
 L.Marker.prototype.options.icon = BlueIcon;
 
-const LocationMarker = ({ onClick }: { onClick: (loc: { lat: number; lng: number }) => void }) => {
+// 👇 This helper component will fly the map to new location on update
+const FlyToLocation = ({ lat, lng }: { lat: number; lng: number }) => {
+  const map = useMap();
+
+  useEffect(() => {
+    if (lat && lng) {
+      map.flyTo([lat, lng], 15, { duration: 1.5 }); // Fly smoothly to the new location
+    }
+  }, [lat, lng, map]);
+
+  return null;
+};
+
+// Allows clicking on the map to select location
+const LocationMarker = ({
+  onClick,
+}: {
+  onClick: (loc: { lat: number; lng: number }) => void;
+}) => {
   useMapEvents({
     click(e) {
       onClick(e.latlng);
@@ -25,6 +52,7 @@ const LocationMarker = ({ onClick }: { onClick: (loc: { lat: number; lng: number
   return null;
 };
 
+// Main Component
 const MapClient = ({
   currentLocation,
   onLocationSelect,
@@ -32,7 +60,8 @@ const MapClient = ({
   currentLocation: { lat: number; lng: number } | null;
   onLocationSelect: (loc: { lat: number; lng: number }) => void;
 }) => {
-  const position = currentLocation || { lat: 12.9716, lng: 77.5946 }; // Default to Bangalore
+  const defaultCenter = { lat: 12.9716, lng: 77.5946 }; // Default to Bangalore
+  const position = currentLocation || defaultCenter;
 
   return (
     <div className="h-64 w-full rounded-lg overflow-hidden">
@@ -41,14 +70,21 @@ const MapClient = ({
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
+
+        {/* 👇 Fly to location if set */}
         {currentLocation && (
-          <Marker position={currentLocation}>
-            <Popup>
-              Selected Location <br />
-              {currentLocation.lat.toFixed(6)}, {currentLocation.lng.toFixed(6)}
-            </Popup>
-          </Marker>
+          <>
+            <FlyToLocation lat={currentLocation.lat} lng={currentLocation.lng} />
+            <Marker position={currentLocation}>
+              <Popup>
+                Selected Location <br />
+                {currentLocation.lat.toFixed(6)}, {currentLocation.lng.toFixed(6)}
+              </Popup>
+            </Marker>
+          </>
         )}
+
+        {/* Allow user to click and select a location */}
         <LocationMarker onClick={onLocationSelect} />
       </MapContainer>
     </div>
