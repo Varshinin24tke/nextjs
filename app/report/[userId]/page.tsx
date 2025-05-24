@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect, Suspense, use } from "react";
@@ -14,7 +15,7 @@ export default function ReportPage({
 }: {
   params: Promise<{ userId: string }>;
 }) {
-  // ⬇ Unwrap the Promise using React's experimental hook
+  // ⬇️ Unwrap the Promise using React's experimental hook
   const { userId } = use(params);
 
   const searchParams = useSearchParams();
@@ -28,7 +29,11 @@ export default function ReportPage({
   const [selectedLocation, setSelectedLocation] = useState<{
     lat: number;
     lng: number;
-  } | null>(latFromQuery && lngFromQuery ? { lat: latFromQuery, lng: lngFromQuery } : null);
+  } | null>(
+    latFromQuery && lngFromQuery
+      ? { lat: latFromQuery, lng: lngFromQuery }
+      : null
+  );
 
   const [description, setDescription] = useState("");
   const [submitMessage, setSubmitMessage] = useState("");
@@ -46,7 +51,7 @@ export default function ReportPage({
   const handleOSMSearch = async () => {
     if (!searchQuery) return;
     try {
-      const fullQuery =` ${searchQuery}, India`;
+      const fullQuery = `${searchQuery}, India`;
       const response = await fetch(
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
           fullQuery
@@ -81,7 +86,7 @@ export default function ReportPage({
 
     try {
       setSubmitting(true);
-      const URL = "https://yashdb18-hersafety.hf.space/app/save_review";
+      const URL = "https://vedanta-testmodel.hf.space/app/buffer_review";
       const headers = {
         "Content-Type": "application/json",
       };
