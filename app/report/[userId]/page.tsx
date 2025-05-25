@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect, Suspense, use } from "react";
@@ -8,16 +7,21 @@ import { useSearchParams } from "next/navigation";
 
 const MapClient = dynamic(() => import("@/components/MapClient"), {
   ssr: false,
+  loading: () => <div className="h-64 bg-gray-100 flex items-center justify-center">Loading map...</div>,
 });
+
+interface Suggestion {
+  display_name: string;
+  lat: string;
+  lon: string;
+}
 
 export default function ReportPage({
   params,
 }: {
   params: Promise<{ userId: string }>;
 }) {
-  // ⬇️ Unwrap the Promise using React's experimental hook
   const { userId } = use(params);
-
   const searchParams = useSearchParams();
 
   const latParam = searchParams.get("lat");
@@ -26,48 +30,48 @@ export default function ReportPage({
   const latFromQuery = latParam ? parseFloat(latParam) : null;
   const lngFromQuery = lngParam ? parseFloat(lngParam) : null;
 
-  const [selectedLocation, setSelectedLocation] = useState<{
-    lat: number;
-    lng: number;
-  } | null>(
-    latFromQuery && lngFromQuery
-      ? { lat: latFromQuery, lng: lngFromQuery }
-      : null
+  const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number } | null>(
+    latFromQuery && lngFromQuery ? { lat: latFromQuery, lng: lngFromQuery } : null
   );
 
   const [description, setDescription] = useState("");
   const [submitMessage, setSubmitMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [isClient, setIsClient] = useState(false);
-
-  // OSM Search states
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchError, setSearchError] = useState("");
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  const handleOSMSearch = async () => {
-    if (!searchQuery) return;
-    try {
-      const fullQuery = `${searchQuery}, India`;
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-          fullQuery
-        )}`
-      );
-      const data = await response.json();
-      if (data.length > 0) {
-        const { lat, lon } = data[0];
-        setSelectedLocation({ lat: parseFloat(lat), lng: parseFloat(lon) });
-        setSearchError("");
+  // Debounced search
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (searchQuery.length > 2) {
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&countrycodes=in`)
+          .then((res) => res.json())
+          .then((data: Suggestion[]) => {
+            setSuggestions(data);
+          })
+          .catch(() => setSuggestions([]));
       } else {
-        setSearchError("Location not found.");
+        setSuggestions([]);
       }
-    } catch (err) {
-      console.error(err);
-      setSearchError("Search failed. Please try again.");
+    }, 300); // debounce delay
+
+    return () => clearTimeout(timeout);
+  }, [searchQuery]);
+
+  const handleSuggestionClick = (place: Suggestion) => {
+    setSelectedLocation({ lat: parseFloat(place.lat), lng: parseFloat(place.lon) });
+    setSearchQuery(place.display_name);
+    setSuggestions([]);
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter" && suggestions.length > 0) {
+      handleSuggestionClick(suggestions[0]);
     }
   };
 
@@ -86,21 +90,27 @@ export default function ReportPage({
 
     try {
       setSubmitting(true);
-      const URL = "https://vedanta-testmodel.hf.space/app/buffer_review";
-      const headers = {
-        "Content-Type": "application/json",
-      };
+      setSubmitMessage("");
 
-      await fetch(URL, {
+      const URL = "https://vedanta-testmodel.hf.space/app/buffer_review";
+      const response = await fetch(URL, {
         method: "POST",
-        headers,
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(body),
       });
-      setSubmitMessage("Report submitted successfully.");
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      await response.json();
+      setSubmitMessage("Report submitted successfully!");
       setDescription("");
     } catch (error) {
-      console.error(error);
-      setSubmitMessage("Failed to submit report.");
+      console.error("Submission error:", error);
+      setSubmitMessage(`Failed to submit report. ${(error as Error).message}`);
     } finally {
       setSubmitting(false);
     }
@@ -124,58 +134,57 @@ export default function ReportPage({
         Reporting as: <span className="font-semibold">{userId}</span>
       </p>
 
-      {latFromQuery && lngFromQuery ? (
-        <div className="flex flex-col gap-2 mb-4">
+      {latFromQuery && lngFromQuery && (
+        <div className="mb-4">
           <p className="text-blue-600 font-medium">
             From URL Query: {latFromQuery.toFixed(5)}, {lngFromQuery.toFixed(5)}
           </p>
           <button
             onClick={handleSetHomeLocation}
-            className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-2 px-4 rounded"
+            className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-2 px-4 rounded mt-2"
           >
             Set as Home Location
           </button>
         </div>
-      ) : (
-        <p className="text-red-500 font-medium mb-4">
-          No latitude/longitude in query params.
-        </p>
       )}
 
-      {/* Search bar above the map */}
-      <div className="space-y-2 mb-4">
-        <label className="block font-semibold">Search Location (OSM)</label>
-        <div className="flex gap-2">
-          <input
-            type="text"
-            placeholder="Search location"
-            className="text-black p-2 rounded border w-full"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          <button
-            className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-4 rounded"
-            onClick={handleOSMSearch}
-          >
-            Search
-          </button>
-        </div>
-        {searchError && (
-          <p className="text-red-500 font-medium">{searchError}</p>
+      <div className="mb-4 relative">
+        <label className="block font-semibold mb-1">Search Location</label>
+        <input
+          type="text"
+          placeholder="Start typing a location..."
+          className="text-black p-2 rounded border w-full"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          onKeyDown={handleKeyDown}
+        />
+        {suggestions.length > 0 && (
+          <ul className="absolute bg-white border w-full mt-1 max-h-52 overflow-auto z-50 rounded shadow">
+            {suggestions.map((place, idx) => (
+              <li
+                key={idx}
+                className="p-2 hover:bg-gray-100 cursor-pointer text-sm"
+                onClick={() => handleSuggestionClick(place)}
+              >
+                {place.display_name}
+              </li>
+            ))}
+          </ul>
         )}
       </div>
 
-      <Suspense fallback={<div>Loading Map...</div>}>
-        <MapClient
-          onLocationSelect={setSelectedLocation}
-          currentLocation={selectedLocation}
-        />
-      </Suspense>
+      <div className="relative z-10 mb-2">
+        <Suspense fallback={<div className="h-64 bg-gray-100 flex items-center justify-center">Loading map...</div>}>
+          <MapClient
+            onLocationSelect={setSelectedLocation}
+            currentLocation={selectedLocation}
+          />
+        </Suspense>
+      </div>
 
       {selectedLocation && (
         <p className="text-gray-700 font-medium mt-2">
-          Selected: {selectedLocation.lat.toFixed(5)},{" "}
-          {selectedLocation.lng.toFixed(5)}
+          Selected: {selectedLocation.lat.toFixed(5)}, {selectedLocation.lng.toFixed(5)}
         </p>
       )}
 
@@ -192,9 +201,7 @@ export default function ReportPage({
         </div>
 
         <button
-          className={`bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded w-full ${
-            submitting ? "opacity-50 cursor-not-allowed" : ""
-          }`}
+          className={`bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded w-full ${submitting ? "opacity-50 cursor-not-allowed" : ""}`}
           onClick={handleSubmit}
           disabled={submitting}
         >
@@ -202,7 +209,7 @@ export default function ReportPage({
         </button>
 
         {submitMessage && (
-          <p className="text-sm font-medium text-center text-gray-700">
+          <p className={`text-sm font-medium text-center ${submitMessage.includes("Failed") ? "text-red-500" : "text-green-500"}`}>
             {submitMessage}
           </p>
         )}
