@@ -10,12 +10,6 @@ const MapClient = dynamic(() => import("@/components/MapClient"), {
   loading: () => <div className="h-64 bg-gray-100 flex items-center justify-center">Loading map...</div>,
 });
 
-interface Suggestion {
-  display_name: string;
-  lat: string;
-  lon: string;
-}
-
 export default function ReportPage({
   params,
 }: {
@@ -38,41 +32,59 @@ export default function ReportPage({
   const [submitMessage, setSubmitMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [suggestions, setSuggestions] = useState<{ lat: string; lon: string; display_name: string }[]>([]);
   const [isClient, setIsClient] = useState(false);
+  const [rating, setRating] = useState(0);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  // Debounced search
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (searchQuery.length > 2) {
         fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&countrycodes=in`)
           .then((res) => res.json())
-          .then((data: Suggestion[]) => {
+          .then((data) => {
             setSuggestions(data);
           })
           .catch(() => setSuggestions([]));
       } else {
         setSuggestions([]);
       }
-    }, 300); // debounce delay
+    }, 300);
 
     return () => clearTimeout(timeout);
   }, [searchQuery]);
 
-  const handleSuggestionClick = (place: Suggestion) => {
+  const handleSuggestionClick = (place: { lat: string; lon: string; display_name: string }) => {
     setSelectedLocation({ lat: parseFloat(place.lat), lng: parseFloat(place.lon) });
     setSearchQuery(place.display_name);
     setSuggestions([]);
   };
 
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter" && suggestions.length > 0) {
+  const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (suggestions.length > 0) {
       handleSuggestionClick(suggestions[0]);
     }
+  };
+
+  const handleSetHomeLocation = () => {
+    if (latFromQuery && lngFromQuery) {
+      setSelectedLocation({ lat: latFromQuery, lng: lngFromQuery });
+    }
+  };
+
+  const getStarColor = (index: number): string => {
+    if (rating >= index + 1) {
+      if (rating === 1) return "text-red-500";
+      if (rating === 2) return index === 0 ? "text-orange-500" : "text-yellow-500";
+      if (rating === 3) return index <= 1 ? "text-yellow-500" : "text-lime-500";
+      if (rating === 4) return index <= 2 ? "text-lime-500" : "text-green-500";
+      if (rating === 5) return "text-green-500";
+    }
+    return "text-gray-300";
   };
 
   const handleSubmit = async () => {
@@ -86,6 +98,7 @@ export default function ReportPage({
       description,
       latt: selectedLocation.lat,
       long: selectedLocation.lng,
+      rating,
     };
 
     try {
@@ -108,6 +121,7 @@ export default function ReportPage({
       await response.json();
       setSubmitMessage("Report submitted successfully!");
       setDescription("");
+      setRating(0);
     } catch (error) {
       console.error("Submission error:", error);
       setSubmitMessage(`Failed to submit report. ${(error as Error).message}`);
@@ -116,23 +130,13 @@ export default function ReportPage({
     }
   };
 
-  const handleSetHomeLocation = () => {
-    if (latFromQuery && lngFromQuery) {
-      setSelectedLocation({ lat: latFromQuery, lng: lngFromQuery });
-    }
-  };
-
   if (!isClient) return null;
 
   return (
     <div className="min-h-screen bg-white text-gray-900 p-4 md:p-6 max-w-xl mx-auto">
-      <h1 className="text-2xl md:text-3xl font-bold mb-4 text-emerald-700">
-        Report a Location
-      </h1>
+      <h1 className="text-2xl md:text-3xl font-bold mb-4 text-emerald-700">Report a Location</h1>
 
-      <p className="text-sm text-gray-600 mb-4">
-        Reporting as: <span className="font-semibold">{userId}</span>
-      </p>
+      <p className="text-sm text-gray-600 mb-4">Reporting as: <span className="font-semibold">{userId}</span></p>
 
       {latFromQuery && lngFromQuery && (
         <div className="mb-4">
@@ -148,7 +152,7 @@ export default function ReportPage({
         </div>
       )}
 
-      <div className="mb-4 relative">
+      <form onSubmit={handleSearchSubmit} className="mb-4 relative">
         <label className="block font-semibold mb-1">Search Location</label>
         <input
           type="text"
@@ -156,7 +160,6 @@ export default function ReportPage({
           className="text-black p-2 rounded border w-full"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          onKeyDown={handleKeyDown}
         />
         {suggestions.length > 0 && (
           <ul className="absolute bg-white border w-full mt-1 max-h-52 overflow-auto z-50 rounded shadow">
@@ -171,7 +174,7 @@ export default function ReportPage({
             ))}
           </ul>
         )}
-      </div>
+      </form>
 
       <div className="relative z-10 mb-2">
         <Suspense fallback={<div className="h-64 bg-gray-100 flex items-center justify-center">Loading map...</div>}>
@@ -198,6 +201,22 @@ export default function ReportPage({
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
+        </div>
+
+        <div className="mb-4">
+          <label className="block font-semibold mb-1">Rate This Location</label>
+          <div className="flex space-x-1">
+            {[...Array(5)].map((_, index) => (
+              <button
+                key={index}
+                type="button"
+                onClick={() => setRating(index + 1)}
+                className={`text-2xl ${getStarColor(index)} focus:outline-none`}
+              >
+                ★
+              </button>
+            ))}
+          </div>
         </div>
 
         <button
