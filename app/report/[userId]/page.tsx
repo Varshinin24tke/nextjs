@@ -36,6 +36,9 @@ export default function ReportPage({
   const [isClient, setIsClient] = useState(false);
   const [rating, setRating] = useState(0);
 
+  const ratingEmojis = ["😨", "😟", "😐", "🙂", "😄"];
+  const ratingLabels = ["Very Unsafe", "Unsafe", "Neutral", "Safe", "Very Safe"];
+
   useEffect(() => {
     setIsClient(true);
   }, []);
@@ -76,20 +79,9 @@ export default function ReportPage({
     }
   };
 
-  const getStarColor = (index: number): string => {
-    if (rating >= index + 1) {
-      if (rating === 1) return "text-red-500";
-      if (rating === 2) return index === 0 ? "text-orange-500" : "text-yellow-500";
-      if (rating === 3) return index <= 1 ? "text-yellow-500" : "text-lime-500";
-      if (rating === 4) return index <= 2 ? "text-lime-500" : "text-green-500";
-      if (rating === 5) return "text-green-500";
-    }
-    return "text-gray-300";
-  };
-
   const handleSubmit = async () => {
-    if (!description || !selectedLocation) {
-      setSubmitMessage("Please fill all fields and select location.");
+    if (!description || !selectedLocation || rating === 0) {
+      setSubmitMessage("Please fill all fields and select location and rating.");
       return;
     }
 
@@ -205,18 +197,25 @@ export default function ReportPage({
 
         <div className="mb-4">
           <label className="block font-semibold mb-1">Rate This Location</label>
-          <div className="flex space-x-1">
-            {[...Array(5)].map((_, index) => (
+          <div className="flex justify-between space-x-2">
+            {ratingEmojis.map((emoji, index) => (
               <button
                 key={index}
                 type="button"
                 onClick={() => setRating(index + 1)}
-                className={`text-2xl ${getStarColor(index)} focus:outline-none`}
+                className={`text-3xl transition-transform ${
+                  rating === index + 1 ? "scale-125" : "opacity-70"
+                } focus:outline-none`}
               >
-                ★
+                {emoji}
               </button>
             ))}
           </div>
+          {rating > 0 && (
+            <p className="mt-1 text-sm text-center text-gray-600">
+              {ratingLabels[rating - 1]}
+            </p>
+          )}
         </div>
 
         <button
