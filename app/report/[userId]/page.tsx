@@ -105,7 +105,7 @@ export default function ReportPage({
       setSubmitting(true);
       setSubmitMessage("");
 
-      const URL = "https://vedanta-testmodel.hf.space/app/buffer_review";
+      const URL = "https://yashdb18-hersafety.hf.space/app/save_review";
       const response = await fetch(URL, {
         method: "POST",
         headers: {
