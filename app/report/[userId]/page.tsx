@@ -1,8 +1,10 @@
+
 "use client";
 
 import React, { useState, useEffect, Suspense } from "react";
 import dynamic from "next/dynamic";
 import "leaflet/dist/leaflet.css";
+import { useSearchParams } from "next/navigation";
 
 const MapClient = dynamic(() => import("@/components/MapClient"), {
   ssr: false,
@@ -10,10 +12,18 @@ const MapClient = dynamic(() => import("@/components/MapClient"), {
 });
 
 export default function ReportPage() {
-  const latFromQuery = null;
-  const lngFromQuery = null;
+  const searchParams = useSearchParams();
 
-  const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const latParam = searchParams.get("lat");
+  const lngParam = searchParams.get("lng");
+
+  const latFromQuery = latParam ? parseFloat(latParam) : null;
+  const lngFromQuery = lngParam ? parseFloat(lngParam) : null;
+
+  const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number } | null>(
+    latFromQuery && lngFromQuery ? { lat: latFromQuery, lng: lngFromQuery } : null
+  );
+
   const [description, setDescription] = useState("");
   const [submitMessage, setSubmitMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -23,6 +33,7 @@ export default function ReportPage() {
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
 
+  // Default fallback user ID
   const userId = "00000000-0000-0000-0000-000000000000";
 
   useEffect(() => {
@@ -46,7 +57,7 @@ export default function ReportPage() {
         );
       }
     }
-  }, []);
+  }, [latFromQuery, lngFromQuery]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -145,9 +156,15 @@ export default function ReportPage() {
     <div className="min-h-screen bg-white text-gray-900 p-4 md:p-6 max-w-xl mx-auto">
       <h1 className="text-2xl md:text-3xl font-bold mb-4 text-emerald-700">Report a Location</h1>
 
-      <p className="text-sm text-gray-600 mb-4">
-        Reporting as: <span className="font-semibold">{userId}</span>
-      </p>
+      <p className="text-sm text-gray-600 mb-4">Reporting as: <span className="font-semibold">{userId}</span></p>
+
+      {latFromQuery && lngFromQuery && (
+        <div className="mb-4">
+          <p className="text-blue-600 font-medium">
+            From URL Query: {latFromQuery.toFixed(5)}, {lngFromQuery.toFixed(5)}
+          </p>
+        </div>
+      )}
 
       <form onSubmit={handleSearchSubmit} className="mb-4 relative">
         <label className="block font-semibold mb-1">Search Location</label>
