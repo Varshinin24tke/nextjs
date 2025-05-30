@@ -96,24 +96,7 @@ export default function ReportPage({
     }
   };
 
-  const handleUseMyLocation = () => {
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setSelectedLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          });
-        },
-        (error) => {
-          console.warn("Geolocation error:", error);
-          alert("Could not fetch your location. Please allow location access.");
-        }
-      );
-    } else {
-      alert("Geolocation is not supported by your browser.");
-    }
-  };
+ 
 
   const handleSubmit = async () => {
     if (!description || !selectedLocation || rating === 0) {
@@ -197,13 +180,6 @@ export default function ReportPage({
           </button>
         </div>
       )}
-
-      <button
-        onClick={handleUseMyLocation}
-        className="bg-blue-500 text-white px-4 py-2 rounded mb-4"
-      >
-        Use My Current Location
-      </button>
 
       <form onSubmit={handleSearchSubmit} className="mb-4 relative">
         <label className="block font-semibold mb-1">Search Location</label>
