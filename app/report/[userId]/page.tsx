@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, Suspense, use } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import dynamic from "next/dynamic";
 import "leaflet/dist/leaflet.css";
 import { useSearchParams } from "next/navigation";
@@ -10,12 +10,7 @@ const MapClient = dynamic(() => import("@/components/MapClient"), {
   loading: () => <div className="h-64 bg-gray-100 flex items-center justify-center">Loading map...</div>,
 });
 
-export default function ReportPage({
-  params,
-}: {
-  params: Promise<{ userId: string }>;
-}) {
-  const { userId } = use(params);
+export default function ReportPage() {
   const searchParams = useSearchParams();
 
   const latParam = searchParams.get("lat");
@@ -36,6 +31,9 @@ export default function ReportPage({
   const [isClient, setIsClient] = useState(false);
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
+
+  // Default fallback user ID
+  const userId = "00000000-0000-0000-0000-000000000000";
 
   useEffect(() => {
     setIsClient(true);
@@ -89,14 +87,6 @@ export default function ReportPage({
       handleSuggestionClick(suggestions[0]);
     }
   };
-
-  const handleSetHomeLocation = () => {
-    if (latFromQuery && lngFromQuery) {
-      setSelectedLocation({ lat: latFromQuery, lng: lngFromQuery });
-    }
-  };
-
- 
 
   const handleSubmit = async () => {
     if (!description || !selectedLocation || rating === 0) {
@@ -165,19 +155,13 @@ export default function ReportPage({
     <div className="min-h-screen bg-white text-gray-900 p-4 md:p-6 max-w-xl mx-auto">
       <h1 className="text-2xl md:text-3xl font-bold mb-4 text-emerald-700">Report a Location</h1>
 
-      <p className="text-sm text-gray-600 mb-4">Reporting as: <span className="font-semibold">{"00000000-0000-0000-0000-000000000000"}</span></p>
+      <p className="text-sm text-gray-600 mb-4">Reporting as: <span className="font-semibold">{userId}</span></p>
 
       {latFromQuery && lngFromQuery && (
         <div className="mb-4">
           <p className="text-blue-600 font-medium">
             From URL Query: {latFromQuery.toFixed(5)}, {lngFromQuery.toFixed(5)}
           </p>
-          <button
-            onClick={handleSetHomeLocation}
-            className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-2 px-4 rounded mt-2"
-          >
-            Set as Home Location
-          </button>
         </div>
       )}
 
