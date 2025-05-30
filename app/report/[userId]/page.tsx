@@ -21,6 +21,7 @@ export default function ReportPage() {
     lat: number;
     lng: number;
   } | null>(null);
+
   const [description, setDescription] = useState("");
   const [submitMessage, setSubmitMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -167,7 +168,9 @@ export default function ReportPage() {
 
   return (
     <div className="min-h-screen bg-white text-gray-900 p-4 md:p-6 max-w-xl mx-auto">
-      <h1 className="text-2xl md:text-3xl font-bold mb-4 text-emerald-700">Report a Location</h1>
+      <h1 className="text-2xl md:text-3xl font-bold mb-4 text-emerald-700">
+        Report a Location
+      </h1>
 
       <p className="text-sm text-gray-600 mb-4">
         Reporting as: <span className="font-semibold">{userId}</span>
@@ -221,7 +224,8 @@ export default function ReportPage() {
 
       {selectedLocation && (
         <p className="text-gray-700 font-medium mt-2">
-          Selected: {selectedLocation.lat.toFixed(5)}, {selectedLocation.lng.toFixed(5)}
+          Selected: {selectedLocation.lat.toFixed(5)},{" "}
+          {selectedLocation.lng.toFixed(5)}
         </p>
       )}
 
@@ -238,7 +242,9 @@ export default function ReportPage() {
         </div>
 
         <div className="mb-4">
-          <label className="block font-semibold mb-2">How safe is this location?</label>
+          <label className="block font-semibold mb-2">
+            How safe is this location?
+          </label>
           <div className="flex justify-between mb-1">
             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
               <button
@@ -258,9 +264,9 @@ export default function ReportPage() {
             ))}
           </div>
           <div className="flex justify-between text-xs text-gray-600 px-1">
-            <span>Very dissatisfied</span>
+            <span>Very unsafe</span>
             <span>Neutral</span>
-            <span>Very satisfied</span>
+            <span>Very safe</span>
           </div>
           {rating > 0 && (
             <p className="mt-2 text-sm text-center text-gray-600">
