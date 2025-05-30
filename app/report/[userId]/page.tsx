@@ -35,9 +35,7 @@ export default function ReportPage({
   const [suggestions, setSuggestions] = useState<{ lat: string; lon: string; display_name: string }[]>([]);
   const [isClient, setIsClient] = useState(false);
   const [rating, setRating] = useState(0);
-
-  const ratingEmojis = ["😨", "😟", "😐", "🙂", "😄"];
-  const ratingLabels = ["Very Unsafe", "Unsafe", "Neutral", "Safe", "Very Safe"];
+  const [hoverRating, setHoverRating] = useState(0);
 
   useEffect(() => {
     setIsClient(true);
@@ -93,6 +91,8 @@ export default function ReportPage({
       rating,
     };
 
+    console.log("Submitting data:", body);
+
     try {
       setSubmitting(true);
       setSubmitMessage("");
@@ -106,14 +106,31 @@ export default function ReportPage({
         body: JSON.stringify(body),
       });
 
+      
+      const textResponse = await response.text();
+      let data;
+      
+      try {
+        data = textResponse ? JSON.parse(textResponse) : {};
+      } catch (error) {
+  console.error("JSON parse error:", error);
+  data = { status: textResponse };
+}
+
+      console.log("API Response:", {
+        status: response.status,
+        data: data
+      });
+
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(data.message || `HTTP error! status: ${response.status}`);
       }
 
-      await response.json();
       setSubmitMessage("Report submitted successfully!");
       setDescription("");
       setRating(0);
+      setSelectedLocation(null);
+      
     } catch (error) {
       console.error("Submission error:", error);
       setSubmitMessage(`Failed to submit report. ${(error as Error).message}`);
@@ -196,24 +213,33 @@ export default function ReportPage({
         </div>
 
         <div className="mb-4">
-          <label className="block font-semibold mb-1">Rate This Location</label>
-          <div className="flex justify-between space-x-2">
-            {ratingEmojis.map((emoji, index) => (
+          <label className="block font-semibold mb-2">How satisfied are you with this location?</label>
+          <div className="flex justify-between mb-1">
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
               <button
-                key={index}
+                key={num}
                 type="button"
-                onClick={() => setRating(index + 1)}
-                className={`text-3xl transition-transform ${
-                  rating === index + 1 ? "scale-125" : "opacity-70"
-                } focus:outline-none`}
+                onClick={() => setRating(num)}
+                onMouseEnter={() => setHoverRating(num)}
+                onMouseLeave={() => setHoverRating(0)}
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${
+                  (hoverRating || rating) >= num
+                    ? "bg-pink-600 text-white"
+                    : "bg-gray-200 text-gray-700"
+                }`}
               >
-                {emoji}
+                {num}
               </button>
             ))}
           </div>
+          <div className="flex justify-between text-xs text-gray-600 px-1">
+            <span>Very dissatisfied</span>
+            <span>Neutral</span>
+            <span>Very satisfied</span>
+          </div>
           {rating > 0 && (
-            <p className="mt-1 text-sm text-center text-gray-600">
-              {ratingLabels[rating - 1]}
+            <p className="mt-2 text-sm text-center text-gray-600">
+              Selected rating: {rating}
             </p>
           )}
         </div>
