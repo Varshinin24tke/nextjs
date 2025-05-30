@@ -42,6 +42,25 @@ export default function ReportPage({
   }, []);
 
   useEffect(() => {
+    if (!latFromQuery && !lngFromQuery) {
+      if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            setSelectedLocation({
+              lat: position.coords.latitude,
+              lng: position.coords.longitude,
+            });
+          },
+          (error) => {
+            console.warn("Geolocation error:", error);
+          },
+          { enableHighAccuracy: true }
+        );
+      }
+    }
+  }, [latFromQuery, lngFromQuery]);
+
+  useEffect(() => {
     const timeout = setTimeout(() => {
       if (searchQuery.length > 2) {
         fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&countrycodes=in`)
@@ -77,6 +96,25 @@ export default function ReportPage({
     }
   };
 
+  const handleUseMyLocation = () => {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setSelectedLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+        },
+        (error) => {
+          console.warn("Geolocation error:", error);
+          alert("Could not fetch your location. Please allow location access.");
+        }
+      );
+    } else {
+      alert("Geolocation is not supported by your browser.");
+    }
+  };
+
   const handleSubmit = async () => {
     if (!description || !selectedLocation || rating === 0) {
       setSubmitMessage("Please fill all fields and select location and rating.");
@@ -106,16 +144,15 @@ export default function ReportPage({
         body: JSON.stringify(body),
       });
 
-      
       const textResponse = await response.text();
       let data;
-      
+
       try {
         data = textResponse ? JSON.parse(textResponse) : {};
       } catch (error) {
-  console.error("JSON parse error:", error);
-  data = { status: textResponse };
-}
+        console.error("JSON parse error:", error);
+        data = { status: textResponse };
+      }
 
       console.log("API Response:", {
         status: response.status,
@@ -130,7 +167,7 @@ export default function ReportPage({
       setDescription("");
       setRating(0);
       setSelectedLocation(null);
-      
+
     } catch (error) {
       console.error("Submission error:", error);
       setSubmitMessage(`Failed to submit report. ${(error as Error).message}`);
@@ -160,6 +197,13 @@ export default function ReportPage({
           </button>
         </div>
       )}
+
+      <button
+        onClick={handleUseMyLocation}
+        className="bg-blue-500 text-white px-4 py-2 rounded mb-4"
+      >
+        Use My Current Location
+      </button>
 
       <form onSubmit={handleSearchSubmit} className="mb-4 relative">
         <label className="block font-semibold mb-1">Search Location</label>
@@ -213,7 +257,7 @@ export default function ReportPage({
         </div>
 
         <div className="mb-4">
-          <label className="block font-semibold mb-2">How satisfied are you with this location?</label>
+          <label className="block font-semibold mb-2">How safe is this location?</label>
           <div className="flex justify-between mb-1">
             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
               <button
