@@ -3,11 +3,15 @@
 import React, { useState, useEffect, Suspense, use } from "react";
 import dynamic from "next/dynamic";
 import "leaflet/dist/leaflet.css";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 
 const MapClient = dynamic(() => import("@/components/MapClient"), {
   ssr: false,
-  loading: () => <div className="h-64 bg-gray-100 flex items-center justify-center">Loading map...</div>,
+  loading: () => (
+    <div className="h-64 bg-gray-100 flex items-center justify-center">
+      Loading map...
+    </div>
+  ),
 });
 
 export default function ReportPage({
@@ -15,6 +19,7 @@ export default function ReportPage({
 }: {
   params: Promise<{ userId: string }>;
 }) {
+  const router = useRouter();
   const { userId } = use(params);
   const searchParams = useSearchParams();
 
@@ -24,15 +29,18 @@ export default function ReportPage({
   const latFromQuery = latParam ? parseFloat(latParam) : null;
   const lngFromQuery = lngParam ? parseFloat(lngParam) : null;
 
-  const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number } | null>(
-    latFromQuery && lngFromQuery ? { lat: latFromQuery, lng: lngFromQuery } : null
-  );
+  const [selectedLocation, setSelectedLocation] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(latFromQuery && lngFromQuery ? { lat: latFromQuery, lng: lngFromQuery } : null);
 
   const [description, setDescription] = useState("");
   const [submitMessage, setSubmitMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [suggestions, setSuggestions] = useState<{ lat: string; lon: string; display_name: string }[]>([]);
+  const [suggestions, setSuggestions] = useState<
+    { lat: string; lon: string; display_name: string }[]
+  >([]);
   const [isClient, setIsClient] = useState(false);
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
@@ -63,7 +71,11 @@ export default function ReportPage({
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (searchQuery.length > 2) {
-        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&countrycodes=in`)
+        fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+            searchQuery
+          )}&countrycodes=in`
+        )
           .then((res) => res.json())
           .then((data) => {
             setSuggestions(data);
@@ -77,7 +89,11 @@ export default function ReportPage({
     return () => clearTimeout(timeout);
   }, [searchQuery]);
 
-  const handleSuggestionClick = (place: { lat: string; lon: string; display_name: string }) => {
+  const handleSuggestionClick = (place: {
+    lat: string;
+    lon: string;
+    display_name: string;
+  }) => {
     setSelectedLocation({ lat: parseFloat(place.lat), lng: parseFloat(place.lon) });
     setSearchQuery(place.display_name);
     setSuggestions([]);
@@ -95,8 +111,6 @@ export default function ReportPage({
       setSelectedLocation({ lat: latFromQuery, lng: lngFromQuery });
     }
   };
-
- 
 
   const handleSubmit = async () => {
     if (!description || !selectedLocation || rating === 0) {
@@ -139,7 +153,7 @@ export default function ReportPage({
 
       console.log("API Response:", {
         status: response.status,
-        data: data
+        data: data,
       });
 
       if (!response.ok) {
@@ -150,7 +164,6 @@ export default function ReportPage({
       setDescription("");
       setRating(0);
       setSelectedLocation(null);
-
     } catch (error) {
       console.error("Submission error:", error);
       setSubmitMessage(`Failed to submit report. ${(error as Error).message}`);
@@ -159,13 +172,25 @@ export default function ReportPage({
     }
   };
 
+  // ⛔ Redirect if userId is missing
+  useEffect(() => {
+    if (!userId || userId.trim() === "") {
+      router.push("/reportIssue");
+    }
+  }, [userId, router]);
+
   if (!isClient) return null;
 
   return (
     <div className="min-h-screen bg-white text-gray-900 p-4 md:p-6 max-w-xl mx-auto">
       <h1 className="text-2xl md:text-3xl font-bold mb-4 text-emerald-700">Report a Location</h1>
 
-      <p className="text-sm text-gray-600 mb-4">Reporting as: <span className="font-semibold">{userId}</span></p>
+      <p className="text-sm text-gray-600 mb-4">
+        Reporting as:{" "}
+        <span className="font-semibold">
+          {userId ?? "00000000-0000-0000-0000-000000000000"}
+        </span>
+      </p>
 
       {latFromQuery && lngFromQuery && (
         <div className="mb-4">
@@ -265,7 +290,9 @@ export default function ReportPage({
         </div>
 
         <button
-          className={`bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded w-full ${submitting ? "opacity-50 cursor-not-allowed" : ""}`}
+          className={`bg-pink-600 hover:bg-pink-700 text-white font-semibold py-2 px-4 rounded w-full ${
+            submitting ? "opacity-50 cursor-not-allowed" : ""
+          }`}
           onClick={handleSubmit}
           disabled={submitting}
         >
@@ -273,7 +300,11 @@ export default function ReportPage({
         </button>
 
         {submitMessage && (
-          <p className={`text-sm font-medium text-center ${submitMessage.includes("Failed") ? "text-red-500" : "text-green-500"}`}>
+          <p
+            className={`text-sm font-medium text-center ${
+              submitMessage.includes("Failed") ? "text-red-500" : "text-green-500"
+            }`}
+          >
             {submitMessage}
           </p>
         )}
