@@ -3,7 +3,7 @@
 import React, { useState, useEffect, Suspense, use } from "react";
 import dynamic from "next/dynamic";
 import "leaflet/dist/leaflet.css";
-import { useSearchParams } from "next/navigation";
+
 
 const MapClient = dynamic(() => import("@/components/MapClient"), {
   ssr: false,
@@ -16,18 +16,7 @@ export default function ReportPage({
   params: Promise<{ userId: string }>;
 }) {
   const { userId } = use(params);
-  const searchParams = useSearchParams();
-
-  const latParam = searchParams.get("lat");
-  const lngParam = searchParams.get("lng");
-
-  const latFromQuery = latParam ? parseFloat(latParam) : null;
-  const lngFromQuery = lngParam ? parseFloat(lngParam) : null;
-
-  const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number } | null>(
-    latFromQuery && lngFromQuery ? { lat: latFromQuery, lng: lngFromQuery } : null
-  );
-
+  const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [description, setDescription] = useState("");
   const [submitMessage, setSubmitMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -37,28 +26,28 @@ export default function ReportPage({
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
 
+
+
   useEffect(() => {
     setIsClient(true);
   }, []);
 
   useEffect(() => {
-    if (!latFromQuery && !lngFromQuery) {
-      if ("geolocation" in navigator) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            setSelectedLocation({
-              lat: position.coords.latitude,
-              lng: position.coords.longitude,
-            });
-          },
-          (error) => {
-            console.warn("Geolocation error:", error);
-          },
-          { enableHighAccuracy: true }
-        );
-      }
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setSelectedLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+        },
+        (error) => {
+          console.warn("Geolocation error:", error);
+        },
+        { enableHighAccuracy: true }
+      );
     }
-  }, [latFromQuery, lngFromQuery]);
+  }, []);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -87,12 +76,6 @@ export default function ReportPage({
     e.preventDefault();
     if (suggestions.length > 0) {
       handleSuggestionClick(suggestions[0]);
-    }
-  };
-
-  const handleSetHomeLocation = () => {
-    if (latFromQuery && lngFromQuery) {
-      setSelectedLocation({ lat: latFromQuery, lng: lngFromQuery });
     }
   };
 
@@ -129,8 +112,6 @@ export default function ReportPage({
       rating,
     };
 
-    console.log("Submitting data:", body);
-
     try {
       setSubmitting(true);
       setSubmitMessage("");
@@ -153,11 +134,6 @@ export default function ReportPage({
         console.error("JSON parse error:", error);
         data = { status: textResponse };
       }
-
-      console.log("API Response:", {
-        status: response.status,
-        data: data
-      });
 
       if (!response.ok) {
         throw new Error(data.message || `HTTP error! status: ${response.status}`);
@@ -183,20 +159,6 @@ export default function ReportPage({
       <h1 className="text-2xl md:text-3xl font-bold mb-4 text-emerald-700">Report a Location</h1>
 
       <p className="text-sm text-gray-600 mb-4">Reporting as: <span className="font-semibold">{userId}</span></p>
-
-      {latFromQuery && lngFromQuery && (
-        <div className="mb-4">
-          <p className="text-blue-600 font-medium">
-            From URL Query: {latFromQuery.toFixed(5)}, {lngFromQuery.toFixed(5)}
-          </p>
-          <button
-            onClick={handleSetHomeLocation}
-            className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-2 px-4 rounded mt-2"
-          >
-            Set as Home Location
-          </button>
-        </div>
-      )}
 
       <button
         onClick={handleUseMyLocation}
