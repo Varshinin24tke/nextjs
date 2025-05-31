@@ -1,7 +1,6 @@
-
 "use client";
 
-import React, { useState, useEffect, Suspense } from "react";
+import React, { useState, useEffect, Suspense, use } from "react";
 import dynamic from "next/dynamic";
 import "leaflet/dist/leaflet.css";
 import { useSearchParams } from "next/navigation";
@@ -11,7 +10,13 @@ const MapClient = dynamic(() => import("@/components/MapClient"), {
   loading: () => <div className="h-64 bg-gray-100 flex items-center justify-center">Loading map...</div>,
 });
 
-export default function ReportPage() {
+export default function ReportPage({
+  params,
+}: {
+  params: Promise<{ userId: string }>;
+}) {
+  const { userId } = use(params);
+
   const searchParams = useSearchParams();
 
   const latParam = searchParams.get("lat");
@@ -32,9 +37,6 @@ export default function ReportPage() {
   const [isClient, setIsClient] = useState(false);
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
-
-  // Default fallback user ID
-  const userId = "00000000-0000-0000-0000-000000000000";
 
   useEffect(() => {
     setIsClient(true);
@@ -238,9 +240,9 @@ export default function ReportPage() {
             ))}
           </div>
           <div className="flex justify-between text-xs text-gray-600 px-1">
-            <span>Very dissatisfied</span>
+            <span>Unsafe</span>
             <span>Neutral</span>
-            <span>Very satisfied</span>
+            <span>Safe</span>
           </div>
           {rating > 0 && (
             <p className="mt-2 text-sm text-center text-gray-600">
