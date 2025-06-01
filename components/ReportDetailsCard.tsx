@@ -8,7 +8,6 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 
 interface ReportDetailsCardProps {
   description: string;
@@ -97,13 +96,14 @@ const ReportDetailsCard: React.FC<ReportDetailsCardProps> = ({
           <label className="block text-sm md:text-base font-semibold text-gray-700 mb-3">
             Description
           </label>
-          <Textarea
-            placeholder="Describe the safety concerns or issues at this location..."
-            className="min-h-[100px] md:min-h-[120px] text-sm md:text-base border-2 border-gray-200 focus:border-blue-500 transition-all duration-300 resize-none rounded-xl"
-            value={description}
-            onChange={(e) => onDescriptionChange(e.target.value)}
-          />
-        </div>
+          
+        </div><textarea
+  className="w-full p-4 rounded-xl bg-neutral-900 text-white placeholder-gray-400 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm transition-all duration-200"
+  placeholder="Describe the issue here..."
+  rows={4}
+  value={description}
+  onChange={(e) => onDescriptionChange(e.target.value)}
+/>
 
         {/* Safety Rating */}
         <div className="animate-fade-in">

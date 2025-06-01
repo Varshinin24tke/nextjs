@@ -108,8 +108,33 @@ export default function ReportPage() {
       setSubmitting(true);
       setSubmitMessage("");
 
-      // Simulate API call for demo
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const URL = "https://yashdb18-hersafety.hf.space/app/save_review";
+      const response = await fetch(URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      });
+
+      const textResponse = await response.text();
+      let data;
+
+      try {
+        data = textResponse ? JSON.parse(textResponse) : {};
+      } catch (error) {
+        console.error("JSON parse error:", error);
+        data = { status: textResponse };
+      }
+
+      console.log("API Response:", {
+        status: response.status,
+        data: data,
+      });
+
+      if (!response.ok) {
+        throw new Error(data.message || `HTTP error! status: ${response.status}`);
+      }
 
       setSubmitMessage("Report submitted successfully!");
       setDescription("");
