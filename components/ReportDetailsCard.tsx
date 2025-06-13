@@ -88,7 +88,14 @@ const ReportDetailsCard: React.FC<ReportDetailsCardProps> = ({
   return (
     <Card className="shadow-xl border-0 bg-white/90 backdrop-blur-sm hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
       <CardHeader className="pb-4">
-        <CardTitle className="text-lg md:text-xl">Report Details</CardTitle>
+        <CardTitle className="flex items-center gap-2 text-base font-semibold text-gray-800">
+  <span className="flex items-center gap-1 px-2 py-1 rounded-md text-white bg-gradient-to-r from-blue-500 to-purple-500 shadow-sm">
+    <Shield className="h-4 w-4" />
+    Report Details
+  </span>
+</CardTitle>
+
+
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Description */}

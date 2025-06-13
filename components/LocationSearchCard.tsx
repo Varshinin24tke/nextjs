@@ -25,10 +25,14 @@ const LocationSearchCard: React.FC<LocationSearchCardProps> = ({
   return (
     <Card className="shadow-xl border-0 bg-white/90 backdrop-blur-sm hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 overflow-visible">
       <CardHeader className="pb-4">
-        <CardTitle className="flex items-center gap-3 text-lg md:text-xl">
-          <Search className="h-5 w-5 md:h-6 md:w-6 text-blue-600" />
-          Location Search
-        </CardTitle>
+        <CardTitle className="flex items-center gap-2 text-base font-semibold text-gray-800">
+  <span className="flex items-center gap-1 px-2 py-1 rounded-md text-white bg-gradient-to-r from-blue-500 to-purple-500 shadow-sm">
+    <Search className="h-4 w-4" />
+    Location Search
+  </span>
+</CardTitle>
+
+
       </CardHeader>
       <CardContent>
         <form onSubmit={onSearchSubmit} className="relative z-50">
@@ -42,7 +46,6 @@ const LocationSearchCard: React.FC<LocationSearchCardProps> = ({
               onChange={(e) => onSearchChange(e.target.value)}
             />
           </div>
-
           {suggestions.length > 0 && (
             <div className="mt-2 bg-white border-2 border-gray-200 border-t-0 rounded-b-xl shadow-xl z-50 animate-fade-in">
               {suggestions.map((place, idx) => (

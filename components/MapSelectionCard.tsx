@@ -20,10 +20,14 @@ const MapSelectionCard: React.FC<MapSelectionCardProps> = ({
   return (
     <Card className="shadow-xl border-0 bg-white/90 backdrop-blur-sm hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
       <CardHeader className="pb-4">
-        <CardTitle className="flex items-center gap-3 text-lg md:text-xl">
-          <MapPin className="h-5 w-5 md:h-6 md:w-6 text-blue-600" />
-          Select Location
-        </CardTitle>
+        <CardTitle className="flex items-center gap-2 text-base font-semibold text-gray-800">
+  <span className="flex items-center gap-1 px-2 py-1 rounded-md text-white bg-gradient-to-r from-blue-500 to-purple-500 shadow-sm">
+    <MapPin className="h-4 w-4" />
+    Select Location
+  </span>
+</CardTitle>
+
+
       </CardHeader>
       <CardContent>
         <div className="rounded-xl overflow-hidden border-2 border-gray-200 hover:border-blue-300 transition-colors duration-300">
