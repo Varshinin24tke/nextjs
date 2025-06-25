@@ -39,12 +39,12 @@ const LocationSearchCard: React.FC<LocationSearchCardProps> = ({
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 md:h-5 md:w-5 text-gray-400" />
             <Input
-              type="text"
-              placeholder="Search for a location..."
-              className="pl-10 md:pl-12 h-12 md:h-14 text-sm md:text-base border-2 border-gray-200 focus:border-blue-500 transition-all duration-300 rounded-xl"
-              value={searchQuery}
-              onChange={(e) => onSearchChange(e.target.value)}
-            />
+  type="text"
+  placeholder="Search for a location..."
+  className="pl-10 md:pl-12 h-12 md:h-14 text-sm md:text-base border-2 border-gray-300 bg-white text-black focus:border-blue-500 transition-all duration-300 rounded-xl"
+  value={searchQuery ?? ""} // Prevent undefined
+  onChange={(e) => onSearchChange(e.target.value)}
+/>
           </div>
           {suggestions.length > 0 && (
             <div className="mt-2 bg-white border-2 border-gray-200 border-t-0 rounded-b-xl shadow-xl z-50 animate-fade-in">

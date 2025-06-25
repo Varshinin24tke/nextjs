@@ -89,13 +89,11 @@ const ReportDetailsCard: React.FC<ReportDetailsCardProps> = ({
     <Card className="shadow-xl border-0 bg-white/90 backdrop-blur-sm hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center gap-2 text-base font-semibold text-gray-800">
-  <span className="flex items-center gap-1 px-2 py-1 rounded-md text-white bg-gradient-to-r from-blue-500 to-purple-500 shadow-sm">
-    <Shield className="h-4 w-4" />
-    Report Details
-  </span>
-</CardTitle>
-
-
+          <span className="flex items-center gap-1 px-2 py-1 rounded-md text-white bg-gradient-to-r from-blue-500 to-purple-500 shadow-sm">
+            <Shield className="h-4 w-4" />
+            Report Details
+          </span>
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Description */}
@@ -103,14 +101,13 @@ const ReportDetailsCard: React.FC<ReportDetailsCardProps> = ({
           <label className="block text-sm md:text-base font-semibold text-gray-700 mb-3">
             Description
           </label>
-          
-        </div><textarea
-  className="w-full p-4 rounded-xl bg-neutral-900 text-white placeholder-gray-400 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm transition-all duration-200"
-  placeholder="Describe the issue here..."
-  rows={4}
-  value={description}
-  onChange={(e) => onDescriptionChange(e.target.value)}
-/>
+          <textarea
+            className="w-full h-32 p-4 rounded-xl border-2 border-gray-300 bg-white text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
+            placeholder="Describe the issue here..."
+            value={description}
+            onChange={(e) => onDescriptionChange(e.target.value)}
+          />
+        </div>
 
         {/* Safety Rating */}
         <div className="animate-fade-in">
@@ -154,29 +151,17 @@ const ReportDetailsCard: React.FC<ReportDetailsCardProps> = ({
 
             {rating > 0 && (
               <div
-                className={`p-4 md:p-5 rounded-xl border-2 animate-scale-in ${
-                  getSafetyInfo(rating).bgColor
-                } ${getSafetyInfo(rating).borderColor}`}
+                className={`p-4 md:p-5 rounded-xl border-2 animate-scale-in ${getSafetyInfo(rating).bgColor} ${getSafetyInfo(rating).borderColor}`}
               >
                 <div className="flex items-center justify-center gap-3 mb-2">
                   {React.createElement(getSafetyInfo(rating).icon, {
-                    className: `w-5 h-5 md:w-6 md:h-6 ${
-                      getSafetyInfo(rating).textColor
-                    }`,
+                    className: `w-5 h-5 md:w-6 md:h-6 ${getSafetyInfo(rating).textColor}`,
                   })}
-                  <span
-                    className={`text-sm md:text-base font-bold ${
-                      getSafetyInfo(rating).textColor
-                    }`}
-                  >
+                  <span className={`text-sm md:text-base font-bold ${getSafetyInfo(rating).textColor}`}>
                     Rating: {rating}/10 - {getSafetyInfo(rating).label}
                   </span>
                 </div>
-                <p
-                  className={`text-xs md:text-sm text-center ${
-                    getSafetyInfo(rating).textColor
-                  } opacity-80`}
-                >
+                <p className={`text-xs md:text-sm text-center ${getSafetyInfo(rating).textColor} opacity-80`}>
                   {getSafetyInfo(rating).description}
                 </p>
               </div>

@@ -1,13 +1,15 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useParams } from "next/navigation"; // ✅ Import from next/navigation
 import ReportHeader from "@/components/ReportHeader";
 import LocationSearchCard from "@/components/LocationSearchCard";
 import MapSelectionCard from "@/components/MapSelectionCard";
 import ReportDetailsCard from "@/components/ReportDetailsCard";
 
 export default function ReportPage() {
-  const userId = "demo-user"; // Demo user for this example
+  const params = useParams();
+  const userId = params?.userId as string || ""; // ✅ Pull from URL path
 
   const [selectedLocation, setSelectedLocation] = useState<{
     lat: number;
