@@ -1,15 +1,16 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useParams } from "next/navigation"; // ✅ Import from next/navigation
+import { useSearchParams } from "next/navigation";
 import ReportHeader from "@/components/ReportHeader";
 import LocationSearchCard from "@/components/LocationSearchCard";
 import MapSelectionCard from "@/components/MapSelectionCard";
 import ReportDetailsCard from "@/components/ReportDetailsCard";
 
 export default function ReportPage() {
-  const params = useParams();
-  const userId = params?.userId as string||""; // ✅ Pull from URL path
+  const searchParams = useSearchParams();
+  const userId =
+    searchParams.get("userID") || "00000000-0000-0000-0000-000000000000";
 
   const [selectedLocation, setSelectedLocation] = useState<{
     lat: number;
@@ -135,7 +136,9 @@ export default function ReportPage() {
       });
 
       if (!response.ok) {
-        throw new Error(data.message || `HTTP error! status: ${response.status}`);
+        throw new Error(
+          data.message || `HTTP error! status: ${response.status}`
+        );
       }
 
       setSubmitMessage("Report submitted successfully!");
@@ -155,7 +158,6 @@ export default function ReportPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <div className="container mx-auto px-4 pt-6 pb-28 max-w-6xl">
-
         <ReportHeader userId={userId} />
 
         <div className="grid lg:grid-cols-2 gap-6 lg:gap-8">
