@@ -9,7 +9,7 @@ import ReportDetailsCard from "@/components/ReportDetailsCard";
 
 export default function ReportPage() {
   const params = useParams();
-  const userId = params?.userId as string || ""; // ✅ Pull from URL path
+  const userId = params?.userId as string; // ✅ Pull from URL path
 
   const [selectedLocation, setSelectedLocation] = useState<{
     lat: number;
