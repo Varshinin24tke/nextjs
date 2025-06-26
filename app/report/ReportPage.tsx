@@ -156,45 +156,46 @@ export default function ReportPage() {
   if (!isClient) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      <div className="container mx-auto px-4 pt-6 pb-28 max-w-6xl">
-        <ReportHeader userId={userId} />
+  <div className="min-h-screen overflow-y-auto bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="container mx-auto px-4 pt-6 pb-28 max-w-6xl">
+      <ReportHeader userId={userId} />
 
-        <div className="grid lg:grid-cols-2 gap-6 lg:gap-8">
-          {/* Left Column - Location Search & Map */}
-          <div className="space-y-6 order-1 lg:order-1">
-            <LocationSearchCard
-              searchQuery={searchQuery}
-              suggestions={suggestions}
-              onSearchChange={setSearchQuery}
-              onSearchSubmit={handleSearchSubmit}
-              onSuggestionClick={handleSuggestionClick}
-            />
+      <div className="grid lg:grid-cols-2 gap-6 lg:gap-8">
+        {/* Left Column - Location Search & Map */}
+        <div className="space-y-6 order-1 lg:order-1">
+          <LocationSearchCard
+            searchQuery={searchQuery}
+            suggestions={suggestions}
+            onSearchChange={setSearchQuery}
+            onSearchSubmit={handleSearchSubmit}
+            onSuggestionClick={handleSuggestionClick}
+          />
 
-            <MapSelectionCard
-              selectedLocation={selectedLocation}
-              onLocationSelect={setSelectedLocation}
-            />
-          </div>
+          <MapSelectionCard
+            selectedLocation={selectedLocation}
+            onLocationSelect={setSelectedLocation}
+          />
+        </div>
 
-          {/* Right Column - Report Details */}
-          <div className="space-y-6 order-2 lg:order-2">
-            <ReportDetailsCard
-              description={description}
-              rating={rating}
-              hoverRating={hoverRating}
-              submitting={submitting}
-              submitMessage={submitMessage}
-              selectedLocation={selectedLocation}
-              onDescriptionChange={setDescription}
-              onRatingChange={setRating}
-              onRatingHover={setHoverRating}
-              onRatingLeave={() => setHoverRating(0)}
-              onSubmit={handleSubmit}
-            />
-          </div>
+        {/* Right Column - Report Details */}
+        <div className="space-y-6 order-2 lg:order-2">
+          <ReportDetailsCard
+            description={description}
+            rating={rating}
+            hoverRating={hoverRating}
+            submitting={submitting}
+            submitMessage={submitMessage}
+            selectedLocation={selectedLocation}
+            onDescriptionChange={setDescription}
+            onRatingChange={setRating}
+            onRatingHover={setHoverRating}
+            onRatingLeave={() => setHoverRating(0)}
+            onSubmit={handleSubmit}
+          />
         </div>
       </div>
     </div>
-  );
+  </div>
+);
+
 }
