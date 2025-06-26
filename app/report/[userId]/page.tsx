@@ -154,7 +154,8 @@ export default function ReportPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      <div className="container mx-auto px-4 py-6 max-w-6xl">
+      <div className="container mx-auto px-4 pt-6 pb-28 max-w-6xl">
+
         <ReportHeader userId={userId} />
 
         <div className="grid lg:grid-cols-2 gap-6 lg:gap-8">
