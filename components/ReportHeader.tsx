@@ -1,5 +1,4 @@
 import React from "react";
-import { Badge } from "@/components/ui/badge";
 
 interface ReportHeaderProps {
   userId?: string; // Optional now
@@ -16,12 +15,9 @@ const ReportHeader: React.FC<ReportHeaderProps> = ({ userId }) => {
       </p>
 
       {userId && (
-        <Badge className="bg-white text-black border-2 border-gray-300 px-4 py-2 text-sm md:text-base rounded-xl shadow-sm">
-          <span>
-            Reporting as:{" "}
-            <span className="font-semibold text-blue-600">{userId}</span>
-          </span>
-        </Badge>
+        <span>
+          <span className="font-semibold text-blue-600"></span>
+        </span>
       )}
     </div>
   );
